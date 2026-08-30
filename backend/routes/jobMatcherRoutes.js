@@ -1,3 +1,4 @@
+
 // ============================================================
 // AI RESUME ANALYZER
 // JOB MATCHER ROUTE
@@ -8,7 +9,7 @@ const express = require("express");
 
 const {
   matchResumeToJob,
-} = require("../services/jobMatcher");
+} = require("../services/JobMatcher");
 
 const {
   protect,
@@ -235,3 +236,4 @@ router.post("/", protect, async (req, res) => {
 
 
 module.exports = router;
+
