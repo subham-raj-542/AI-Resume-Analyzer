@@ -1,3 +1,4 @@
+
 // ============================================================
 // AI RESUME ANALYZER
 // TAILORED RESUME CONTROLLER
@@ -33,9 +34,22 @@ const {
   parseResume,
 } = require("../services/resumeParser");
 
+// ============================================================
+// IMPORTANT:
+// Actual file name is:
+//
+// backend/services/JobMatcher.js
+//
+// Render/Linux is case-sensitive.
+//
+// DO NOT use:
+// ../services/jobMatcher
+//
+// ============================================================
+
 const {
   matchResumeToJob,
-} = require("../services/jobMatcher");
+} = require("../services/JobMatcher");
 
 const {
   buildTailoredResume,
@@ -51,7 +65,6 @@ const {
 // ============================================================
 
 function getUserId(req) {
-
   return (
     req.user?._id ||
     req.user?.id
@@ -81,7 +94,6 @@ async function getResumeText({
         user: userId,
       });
 
-
     if (!resume) {
 
       const error =
@@ -94,7 +106,6 @@ async function getResumeText({
       throw error;
     }
 
-
     // --------------------------------------------------------
     // Support different Resume model field names
     // --------------------------------------------------------
@@ -106,7 +117,6 @@ async function getResumeText({
       resume.content ||
       "";
 
-
     if (
       databaseResumeText &&
       typeof databaseResumeText === "string"
@@ -115,7 +125,6 @@ async function getResumeText({
       return databaseResumeText.trim();
     }
   }
-
 
   // ----------------------------------------------------------
   // Otherwise use resumeText from request
@@ -128,7 +137,6 @@ async function getResumeText({
 
     return resumeText.trim();
   }
-
 
   return "";
 }
@@ -157,7 +165,6 @@ function validateJobDescription(
 
     throw error;
   }
-
 
   return jobDescription.trim();
 }
@@ -191,14 +198,12 @@ const generateTailoredResume =
         "================================================"
       );
 
-
       // ======================================================
       // USER
       // ======================================================
 
       const userId =
         getUserId(req);
-
 
       if (!userId) {
 
@@ -211,7 +216,6 @@ const generateTailoredResume =
         });
       }
 
-
       // ======================================================
       // REQUEST BODY
       // ======================================================
@@ -223,7 +227,6 @@ const generateTailoredResume =
       } =
         req.body || {};
 
-
       // ======================================================
       // JOB DESCRIPTION
       // ======================================================
@@ -232,7 +235,6 @@ const generateTailoredResume =
         validateJobDescription(
           jobDescription
         );
-
 
       // ======================================================
       // RESUME TEXT
@@ -248,7 +250,6 @@ const generateTailoredResume =
           userId,
         });
 
-
       if (
         !finalResumeText
       ) {
@@ -261,7 +262,6 @@ const generateTailoredResume =
             "Resume text is required.",
         });
       }
-
 
       // ======================================================
       // LOG REQUEST
@@ -287,7 +287,6 @@ const generateTailoredResume =
         finalJobDescription.length
       );
 
-
       // ======================================================
       // PARSE RESUME
       // ======================================================
@@ -296,12 +295,10 @@ const generateTailoredResume =
         "\nParsing resume..."
       );
 
-
       const parsedResume =
         parseResume(
           finalResumeText
         );
-
 
       if (
         !parsedResume ||
@@ -317,7 +314,6 @@ const generateTailoredResume =
         });
       }
 
-
       // ======================================================
       // JOB MATCHING
       // ======================================================
@@ -325,7 +321,6 @@ const generateTailoredResume =
       console.log(
         "Matching resume with job..."
       );
-
 
       const matchResult =
         matchResumeToJob({
@@ -337,7 +332,6 @@ const generateTailoredResume =
             finalJobDescription,
         });
 
-
       // ======================================================
       // BUILD TAILORED RESUME
       // ======================================================
@@ -345,7 +339,6 @@ const generateTailoredResume =
       console.log(
         "Building tailored resume..."
       );
-
 
       const tailoredResume =
         buildTailoredResume(
@@ -355,7 +348,6 @@ const generateTailoredResume =
           finalJobDescription
 
         );
-
 
       if (
         !tailoredResume ||
@@ -370,7 +362,6 @@ const generateTailoredResume =
             "Unable to generate tailored resume.",
         });
       }
-
 
       // ======================================================
       // DEBUG
@@ -422,7 +413,6 @@ const generateTailoredResume =
           : 0
       );
 
-
       // ======================================================
       // FINAL RESPONSE
       // ======================================================
@@ -434,7 +424,6 @@ const generateTailoredResume =
       console.log(
         "================================================\n"
       );
-
 
       return res.status(200).json({
 
@@ -484,10 +473,8 @@ const generateTailoredResume =
         "================================================\n"
       );
 
-
       const statusCode =
         error.statusCode || 500;
-
 
       return res.status(
         statusCode
@@ -531,14 +518,12 @@ const generateTailoredResumePDF =
         "================================================"
       );
 
-
       // ======================================================
       // USER
       // ======================================================
 
       const userId =
         getUserId(req);
-
 
       if (!userId) {
 
@@ -551,7 +536,6 @@ const generateTailoredResumePDF =
         });
       }
 
-
       // ======================================================
       // REQUEST BODY
       // ======================================================
@@ -563,7 +547,6 @@ const generateTailoredResumePDF =
       } =
         req.body || {};
 
-
       // ======================================================
       // JOB DESCRIPTION
       // ======================================================
@@ -572,7 +555,6 @@ const generateTailoredResumePDF =
         validateJobDescription(
           jobDescription
         );
-
 
       // ======================================================
       // RESUME TEXT
@@ -588,7 +570,6 @@ const generateTailoredResumePDF =
           userId,
         });
 
-
       if (
         !finalResumeText
       ) {
@@ -602,7 +583,6 @@ const generateTailoredResumePDF =
         });
       }
 
-
       // ======================================================
       // PARSE
       // ======================================================
@@ -611,12 +591,10 @@ const generateTailoredResumePDF =
         "Parsing resume for PDF..."
       );
 
-
       const parsedResume =
         parseResume(
           finalResumeText
         );
-
 
       if (
         !parsedResume ||
@@ -632,7 +610,6 @@ const generateTailoredResumePDF =
         });
       }
 
-
       // ======================================================
       // BUILD TAILORED RESUME
       // ======================================================
@@ -640,7 +617,6 @@ const generateTailoredResumePDF =
       console.log(
         "Building tailored resume for PDF..."
       );
-
 
       const tailoredResume =
         buildTailoredResume(
@@ -650,7 +626,6 @@ const generateTailoredResumePDF =
           finalJobDescription
 
         );
-
 
       if (
         !tailoredResume ||
@@ -665,7 +640,6 @@ const generateTailoredResumePDF =
             "Unable to generate tailored resume for PDF.",
         });
       }
-
 
       // ======================================================
       // DEBUG PDF DATA
@@ -724,7 +698,6 @@ const generateTailoredResumePDF =
           : 0
       );
 
-
       // ======================================================
       // GENERATE PDF
       // ======================================================
@@ -733,12 +706,10 @@ const generateTailoredResumePDF =
         "\nGenerating professional tailored resume PDF..."
       );
 
-
       generateResumePDF(
         tailoredResume,
         res
       );
-
 
       console.log(
         "PDF generation started."
@@ -766,7 +737,6 @@ const generateTailoredResumePDF =
         "================================================\n"
       );
 
-
       // ------------------------------------------------------
       // Do not send JSON after PDF stream has started
       // ------------------------------------------------------
@@ -778,10 +748,8 @@ const generateTailoredResumePDF =
         return;
       }
 
-
       const statusCode =
         error.statusCode || 500;
-
 
       return res.status(
         statusCode
@@ -808,3 +776,4 @@ module.exports = {
   generateTailoredResumePDF,
 
 };
+
