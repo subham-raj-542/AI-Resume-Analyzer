@@ -39,28 +39,53 @@
 //
 // Render/Linux is case-sensitive.
 //
-// Therefore this import MUST remain:
+// Therefore:
 //
 // ../services/JobMatcher
+//
+// MUST be used.
 //
 // ============================================================
 
 const express = require("express");
 
+// ============================================================
+// AUTH MIDDLEWARE
+// ============================================================
+
 const {
   protect,
 } = require("../middleware/authMiddleware");
+
+// ============================================================
+// JOB MATCHER SERVICE
+// ============================================================
+//
+// IMPORTANT:
+// Actual file:
+// backend/services/JobMatcher.js
+//
+// DO NOT change the capitalization.
+//
+// ============================================================
 
 const {
   matchResumeToJob,
 } = require("../services/JobMatcher");
 
-const router = express.Router();
+// ============================================================
+// ROUTER
+// ============================================================
 
+const router = express.Router();
 
 // ============================================================
 // HELPERS
 // ============================================================
+
+// ------------------------------------------------------------
+// CLEAN TEXT
+// ------------------------------------------------------------
 
 const cleanText = (value) => {
   if (
@@ -73,10 +98,9 @@ const cleanText = (value) => {
   return String(value).trim();
 };
 
-
-// ============================================================
+// ------------------------------------------------------------
 // SAFE ARRAY
-// ============================================================
+// ------------------------------------------------------------
 
 const safeArray = (value) => {
   return Array.isArray(value)
@@ -84,17 +108,14 @@ const safeArray = (value) => {
     : [];
 };
 
-
-// ============================================================
+// ------------------------------------------------------------
 // CLAMP SCORE
-// ============================================================
+// ------------------------------------------------------------
 
 const clampScore = (value) => {
   const score = Number(value);
 
-  if (
-    !Number.isFinite(score)
-  ) {
+  if (!Number.isFinite(score)) {
     return 0;
   }
 
@@ -107,7 +128,6 @@ const clampScore = (value) => {
   );
 };
 
-
 // ============================================================
 // POST /api/job-match
 // ============================================================
@@ -116,9 +136,7 @@ router.post(
   "/",
   protect,
   async (req, res) => {
-
     try {
-
       console.log(
         "\n================================================"
       );
@@ -131,7 +149,6 @@ router.post(
         "================================================"
       );
 
-
       // ======================================================
       // AUTHENTICATED USER
       // ======================================================
@@ -139,25 +156,21 @@ router.post(
       console.log(
         "Authenticated User ID:",
         req.user?.id ||
-        req.user?._id ||
-        "unknown"
+          req.user?._id ||
+          "unknown"
       );
-
 
       // ======================================================
       // REQUEST DATA
       // ======================================================
 
-      const resumeText =
-        cleanText(
-          req.body?.resumeText
-        );
+      const resumeText = cleanText(
+        req.body?.resumeText
+      );
 
-      const jobDescription =
-        cleanText(
-          req.body?.jobDescription
-        );
-
+      const jobDescription = cleanText(
+        req.body?.jobDescription
+      );
 
       console.log(
         "Resume text length:",
@@ -169,46 +182,31 @@ router.post(
         jobDescription.length
       );
 
-
       // ======================================================
       // VALIDATE RESUME
       // ======================================================
 
-      if (
-        !resumeText
-      ) {
-
+      if (!resumeText) {
         return res.status(400).json({
-
           success: false,
 
           message:
             "Resume text is required.",
-
         });
-
       }
-
 
       // ======================================================
       // VALIDATE JOB DESCRIPTION
       // ======================================================
 
-      if (
-        !jobDescription
-      ) {
-
+      if (!jobDescription) {
         return res.status(400).json({
-
           success: false,
 
           message:
             "Job description is required.",
-
         });
-
       }
-
 
       // ======================================================
       // MINIMUM RESUME CONTENT
@@ -217,18 +215,13 @@ router.post(
       if (
         resumeText.length < 20
       ) {
-
         return res.status(400).json({
-
           success: false,
 
           message:
             "Resume text is too short. Please upload a valid resume.",
-
         });
-
       }
-
 
       // ======================================================
       // MINIMUM JOB DESCRIPTION CONTENT
@@ -237,18 +230,13 @@ router.post(
       if (
         jobDescription.length < 20
       ) {
-
         return res.status(400).json({
-
           success: false,
 
           message:
             "Job description is too short. Please paste a complete job description.",
-
         });
-
       }
-
 
       // ======================================================
       // MAXIMUM INPUT SIZE
@@ -257,34 +245,24 @@ router.post(
       if (
         resumeText.length > 100000
       ) {
-
         return res.status(400).json({
-
           success: false,
 
           message:
             "Resume text is too large.",
-
         });
-
       }
-
 
       if (
         jobDescription.length > 100000
       ) {
-
         return res.status(400).json({
-
           success: false,
 
           message:
             "Job description is too large.",
-
         });
-
       }
-
 
       // ======================================================
       // RUN MATCH ENGINE
@@ -294,7 +272,6 @@ router.post(
         "Running job matcher..."
       );
 
-
       const result =
         await Promise.resolve(
           matchResumeToJob({
@@ -302,7 +279,6 @@ router.post(
             jobDescription,
           })
         );
-
 
       // ======================================================
       // VALIDATE MATCHER RESULT
@@ -313,13 +289,10 @@ router.post(
         typeof result !== "object" ||
         Array.isArray(result)
       ) {
-
         throw new Error(
           "Job matcher did not return a valid result."
         );
-
       }
-
 
       // ======================================================
       // NORMALIZE ARRAYS
@@ -345,7 +318,6 @@ router.post(
           result.missingSkills
         );
 
-
       // ======================================================
       // NORMALIZE SCORES
       // ======================================================
@@ -355,14 +327,14 @@ router.post(
           result.matchScore
         );
 
-      const skillScore =
-        clampScore(
-          result.skillScore
-        );
-
       const keywordScore =
         clampScore(
           result.keywordScore
+        );
+
+      const skillScore =
+        clampScore(
+          result.skillScore
         );
 
       const experienceScore =
@@ -375,7 +347,6 @@ router.post(
           result.roleScore
         );
 
-
       // ======================================================
       // MATCH LEVEL
       // ======================================================
@@ -385,55 +356,37 @@ router.post(
           result.matchLevel
         );
 
-
-      if (
-        !matchLevel
-      ) {
-
+      if (!matchLevel) {
         if (
           matchScore >= 90
         ) {
-
           matchLevel =
             "Excellent Match";
-
         } else if (
           matchScore >= 80
         ) {
-
           matchLevel =
             "Strong Match";
-
         } else if (
           matchScore >= 70
         ) {
-
           matchLevel =
             "Good Match";
-
         } else if (
           matchScore >= 60
         ) {
-
           matchLevel =
             "Moderate Match";
-
         } else if (
           matchScore >= 50
         ) {
-
           matchLevel =
             "Weak Match";
-
         } else {
-
           matchLevel =
             "Poor Match";
-
         }
-
       }
-
 
       // ======================================================
       // SUMMARY
@@ -442,9 +395,8 @@ router.post(
       const summary =
         cleanText(
           result.summary ||
-          result.matchMessage
+            result.matchMessage
         );
-
 
       // ======================================================
       // KEYWORD COVERAGE
@@ -454,9 +406,7 @@ router.post(
         matchedKeywords.length +
         missingKeywords.length;
 
-
       const keywordCoverage = {
-
         matched:
           matchedKeywords.length,
 
@@ -472,9 +422,7 @@ router.post(
                 ) * 100
               )
             : keywordScore,
-
       };
-
 
       // ======================================================
       // SKILL COVERAGE
@@ -484,9 +432,7 @@ router.post(
         matchedSkills.length +
         missingSkills.length;
 
-
       const skillCoverage = {
-
         matched:
           matchedSkills.length,
 
@@ -502,9 +448,7 @@ router.post(
                 ) * 100
               )
             : skillScore,
-
       };
-
 
       // ======================================================
       // EXPERIENCE MATCH
@@ -512,15 +456,16 @@ router.post(
 
       const experienceMatch =
         result.experienceMatch &&
-        typeof result.experienceMatch === "object"
+        typeof result.experienceMatch ===
+          "object"
           ? result.experienceMatch
           : (
               result.experience &&
-              typeof result.experience === "object"
-                ? result.experience
-                : null
-            );
-
+              typeof result.experience ===
+                "object"
+            )
+            ? result.experience
+            : null;
 
       // ======================================================
       // ROLE MATCH
@@ -528,15 +473,16 @@ router.post(
 
       const roleMatch =
         result.roleMatch &&
-        typeof result.roleMatch === "object"
+        typeof result.roleMatch ===
+          "object"
           ? result.roleMatch
           : (
               result.role &&
-              typeof result.role === "object"
-                ? result.role
-                : null
-            );
-
+              typeof result.role ===
+                "object"
+            )
+            ? result.role
+            : null;
 
       // ======================================================
       // PRIORITY ACTIONS
@@ -544,62 +490,47 @@ router.post(
 
       const priorityActions = [];
 
-
-      // ======================================================
+      // ------------------------------------------------------
       // MISSING SKILLS
-      // ======================================================
+      // ------------------------------------------------------
 
       if (
         missingSkills.length > 0
       ) {
-
         priorityActions.push({
+          type: "skill",
 
-          type:
-            "skill",
-
-          priority:
-            "high",
+          priority: "high",
 
           action:
             `Review missing skills: ${missingSkills
               .slice(0, 6)
               .join(", ")}.`,
-
         });
-
       }
 
-
-      // ======================================================
+      // ------------------------------------------------------
       // MISSING KEYWORDS
-      // ======================================================
+      // ------------------------------------------------------
 
       if (
         missingKeywords.length > 0
       ) {
-
         priorityActions.push({
+          type: "keyword",
 
-          type:
-            "keyword",
-
-          priority:
-            "medium",
+          priority: "medium",
 
           action:
             `Use relevant job keywords where they truthfully describe your experience: ${missingKeywords
               .slice(0, 6)
               .join(", ")}.`,
-
         });
-
       }
 
-
-      // ======================================================
+      // ------------------------------------------------------
       // EXPERIENCE
-      // ======================================================
+      // ------------------------------------------------------
 
       if (
         experienceMatch &&
@@ -610,149 +541,106 @@ router.post(
           experienceMatch.score
         ) < 100
       ) {
-
         priorityActions.push({
+          type: "experience",
 
-          type:
-            "experience",
-
-          priority:
-            "high",
+          priority: "high",
 
           action:
             `The role asks for approximately ${experienceMatch.requiredYears} years of experience, while your resume indicates about ${experienceMatch.resumeYears || 0} years.`,
-
         });
-
       }
 
-
-      // ======================================================
+      // ------------------------------------------------------
       // LOW KEYWORD SCORE
-      // ======================================================
+      // ------------------------------------------------------
 
       if (
         keywordScore < 60
       ) {
-
         priorityActions.push({
+          type: "keyword",
 
-          type:
-            "keyword",
-
-          priority:
-            "high",
+          priority: "high",
 
           action:
             "Improve job-specific keyword coverage throughout the resume where those terms genuinely apply.",
-
         });
-
       }
 
-
-      // ======================================================
+      // ------------------------------------------------------
       // LOW SKILL SCORE
-      // ======================================================
+      // ------------------------------------------------------
 
       if (
         skillScore < 60
       ) {
-
         priorityActions.push({
+          type: "skill",
 
-          type:
-            "skill",
-
-          priority:
-            "high",
+          priority: "high",
 
           action:
             "Strengthen the skills section with relevant skills you genuinely possess and can support with evidence.",
-
         });
-
       }
 
-
-      // ======================================================
+      // ------------------------------------------------------
       // LOW EXPERIENCE SCORE
-      // ======================================================
+      // ------------------------------------------------------
 
       if (
         experienceScore < 70
       ) {
-
         priorityActions.push({
+          type: "experience",
 
-          type:
-            "experience",
-
-          priority:
-            "medium",
+          priority: "medium",
 
           action:
             "Highlight relevant internships, projects, work experience and responsibilities that support the target role.",
-
         });
-
       }
 
-
-      // ======================================================
+      // ------------------------------------------------------
       // LOW ROLE SCORE
-      // ======================================================
+      // ------------------------------------------------------
 
       if (
         roleScore < 70
       ) {
-
         priorityActions.push({
+          type: "role",
 
-          type:
-            "role",
-
-          priority:
-            "medium",
+          priority: "medium",
 
           action:
             "Make the target role clearer in the resume headline or professional summary where truthful.",
-
         });
-
       }
 
-
-      // ======================================================
+      // ------------------------------------------------------
       // LOW OVERALL SCORE
-      // ======================================================
+      // ------------------------------------------------------
 
       if (
         matchScore < 70
       ) {
-
         priorityActions.push({
+          type: "overall",
 
-          type:
-            "overall",
-
-          priority:
-            "high",
+          priority: "high",
 
           action:
             "Customize the resume more closely around the responsibilities and requirements of this role.",
-
         });
-
       }
-
 
       // ======================================================
       // FINAL RESULT
       // ======================================================
 
       const finalResult = {
-
         ...result,
 
         // ----------------------------------------------------
@@ -771,13 +659,11 @@ router.post(
 
         roleScore,
 
-
         // ----------------------------------------------------
         // SUMMARY
         // ----------------------------------------------------
 
         summary,
-
 
         // ----------------------------------------------------
         // SKILLS
@@ -787,7 +673,6 @@ router.post(
 
         missingSkills,
 
-
         // ----------------------------------------------------
         // KEYWORDS
         // ----------------------------------------------------
@@ -796,20 +681,17 @@ router.post(
 
         missingKeywords,
 
-
         // ----------------------------------------------------
         // EXPERIENCE
         // ----------------------------------------------------
 
         experienceMatch,
 
-
         // ----------------------------------------------------
         // ROLE
         // ----------------------------------------------------
 
         roleMatch,
-
 
         // ----------------------------------------------------
         // COVERAGE
@@ -819,15 +701,12 @@ router.post(
 
         skillCoverage,
 
-
         // ----------------------------------------------------
         // PRIORITY ACTIONS
         // ----------------------------------------------------
 
         priorityActions,
-
       };
-
 
       // ======================================================
       // SUCCESS LOG
@@ -899,27 +778,23 @@ router.post(
         "================================================\n"
       );
 
-
       // ======================================================
       // SUCCESS RESPONSE
       // ======================================================
 
       return res.status(200).json({
-
-        success:
-          true,
+        success: true,
 
         message:
           "Resume matched with job successfully.",
 
-        result:
-          finalResult,
-
+        result: finalResult,
       });
 
-    } catch (
-      error
-    ) {
+    } catch (error) {
+      // ======================================================
+      // ERROR LOG
+      // ======================================================
 
       console.error(
         "\n================================================"
@@ -935,19 +810,20 @@ router.post(
 
       console.error(
         "Error:",
-        error?.message ||
-        error
+        error?.message || error
       );
 
       console.error(
-        error?.stack ||
-        ""
+        error?.stack || ""
       );
 
       console.error(
         "================================================\n"
       );
 
+      // ======================================================
+      // STATUS CODE
+      // ======================================================
 
       const statusCode =
         Number.isInteger(
@@ -958,54 +834,41 @@ router.post(
           ? error.statusCode
           : 500;
 
+      // ======================================================
+      // ERROR RESPONSE
+      // ======================================================
 
       return res.status(
         statusCode
       ).json({
-
-        success:
-          false,
+        success: false,
 
         message:
           error?.message ||
           "Failed to match resume with job.",
-
       });
-
     }
-
   }
 );
-
 
 // ============================================================
 // INVALID JOB MATCH ROUTE
 // ============================================================
 
 router.use(
-  (
-    req,
-    res
-  ) => {
-
+  (req, res) => {
     return res.status(404).json({
-
-      success:
-        false,
+      success: false,
 
       message:
         `Job match route not found: ${req.method} ${req.originalUrl}`,
-
     });
-
   }
 );
-
 
 // ============================================================
 // EXPORT ROUTER
 // ============================================================
 
-module.exports =
-  router;
+module.exports = router;
 
